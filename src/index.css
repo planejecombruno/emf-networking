@@ -682,15 +682,26 @@ a:hover { text-decoration: underline; }
 .profile-card__avatar {
   width: 64px;
   height: 64px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   object-fit: cover;
   background: var(--bg);
   border: 1px solid var(--border);
   flex-shrink: 0;
   transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 
-/* Minimalist avatar */
+.profile-card__avatar--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  text-transform: uppercase;
+  border-color: transparent;
+}
 
 .profile-card__name {
   font-size: 1.15rem;
