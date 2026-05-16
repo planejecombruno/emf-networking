@@ -48,8 +48,10 @@ const ScrollableTags = ({ title, tags, colorType }) => {
   };
 
   const tagStyle =
-    colorType === "success"
-      ? { background: "rgba(5, 150, 105, 0.08)", color: "var(--success)" }
+    colorType === "interest"
+      ? { background: "var(--accent-soft)", color: "var(--accent)", borderColor: "transparent" }
+      : colorType === "success"
+      ? { background: "var(--success-bg)", color: "var(--success)", borderColor: "transparent" }
       : {};
 
   return (
@@ -57,17 +59,7 @@ const ScrollableTags = ({ title, tags, colorType }) => {
       className="profile-card__areas-group"
       style={{ width: "100%", minWidth: 0, overflow: "hidden" }}
     >
-      <span
-        style={{
-          fontSize: "0.65rem",
-          color: "var(--text-muted)",
-          display: "block",
-          marginBottom: "2px",
-          textTransform: "uppercase",
-          letterSpacing: "0.05em",
-          fontWeight: 600,
-        }}
-      >
+      <span className="profile-card__bio-label">
         {title}
       </span>
       <div
@@ -214,8 +206,12 @@ export default function DirectoryPage() {
       cargo.toLowerCase().includes(searchLower);
 
     const matchArea = filterArea
-      ? p.area_atuacao?.includes(filterArea) ||
-        p.area_interesse?.includes(filterArea)
+      ? filterArea === "Outro"
+        ? // Caso especial: Filtra quem tem áreas customizadas ou não tem nada
+          (p.area_atuacao?.split(", ").some(tag => !AREAS.includes(tag)) || !p.area_atuacao) ||
+          (p.area_interesse?.split(", ").some(tag => !AREAS.includes(tag)) || !p.area_interesse)
+        : // Caso padrão: Filtra pela área selecionada
+          p.area_atuacao?.includes(filterArea) || p.area_interesse?.includes(filterArea)
       : true;
 
     const matchEstado = filterEstado ? p.estado === filterEstado : true;
@@ -285,6 +281,12 @@ export default function DirectoryPage() {
                 {area}
               </button>
             ))}
+            <button
+              className={`filter-chip ${filterArea === "Outro" ? "filter-chip--active" : ""}`}
+              onClick={() => setFilterArea("Outro")}
+            >
+              Outro
+            </button>
           </div>
         </div>
       </div>
@@ -315,45 +317,39 @@ export default function DirectoryPage() {
               interesseTagsRaw.length > 0 ? interesseTagsRaw : ["Outro"];
 
             return (
-              <div key={profile.id} className="profile-card">
-                <div className="profile-card__info">
-                  <div className="profile-card__header">
-                    {profile.foto_url ? (
-                      <img
-                        src={profile.foto_url}
-                        alt={profile.nome}
-                        className="profile-card__avatar"
-                      />
-                    ) : (
-                      <div className="profile-card__avatar profile-card__avatar--placeholder">
-                        {(profile.nome || "?").charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <div className="profile-card__header-content">
-                      <h3 className="profile-card__name">{profile.nome}</h3>
-                      {profile.cargo && (
-                        <div
-                          className="profile-card__cargo"
-                          style={{
-                            fontSize: "0.85rem",
-                            fontWeight: 500,
-                            color: "var(--text-secondary)",
-                          }}
-                        >
-                          {profile.cargo}
+              <div key={profile.id} className="profile-card-wrapper">
+                <div className="profile-card">
+                  <div className="profile-card__info">
+                    <div className="profile-card__header">
+                      {profile.foto_url ? (
+                        <img
+                          src={profile.foto_url}
+                          alt={profile.nome}
+                          className="profile-card__avatar"
+                        />
+                      ) : (
+                        <div className="profile-card__avatar profile-card__avatar--placeholder">
+                          {(profile.nome || "?").charAt(0).toUpperCase()}
                         </div>
                       )}
-                      <div className="profile-card__location">
-                        {profile.cidade || "N/A"}, {profile.estado || "N/A"}
+                      <div className="profile-card__header-content">
+                        <h3 className="profile-card__name">{profile.nome}</h3>
+                        {profile.cargo && (
+                          <div className="profile-card__cargo">
+                            {profile.cargo}
+                          </div>
+                        )}
+                        <div className="profile-card__location">
+                          {profile.cidade || "N/A"}, {profile.estado || "N/A"}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                <div className="profile-card__content">
-                  <div className="profile-card__areas-container">
                     {atuacaoTags.length > 0 && (
-                      <ScrollableTags title="Atuação" tags={atuacaoTags} />
+                      <ScrollableTags 
+                        title="Atuação" 
+                        tags={atuacaoTags} 
+                        colorType="interest"
+                      />
                     )}
                     <ScrollableTags
                       title="Interesse"
@@ -363,17 +359,7 @@ export default function DirectoryPage() {
                   </div>
 
                   <div className="profile-card__bio-group">
-                    <span
-                      style={{
-                        fontSize: "0.65rem",
-                        color: "var(--text-muted)",
-                        display: "block",
-                        marginBottom: "2px",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                        fontWeight: 600,
-                      }}
-                    >
+                    <span className="profile-card__bio-label">
                       Biografia
                     </span>
                     <div className="profile-card__bio">
@@ -385,15 +371,7 @@ export default function DirectoryPage() {
                     </div>
                   </div>
 
-                  <div
-                    className="profile-card__links"
-                    style={{
-                      marginTop: "16px",
-                      display: "flex",
-                      gap: "10px",
-                      flexWrap: "wrap",
-                    }}
-                  >
+                  <div className="profile-card__links">
                     {profile.linkedin_url && (
                       <a
                         href={profile.linkedin_url}
@@ -431,11 +409,9 @@ export default function DirectoryPage() {
             );
           })
         ) : (
-          <div className="empty-state" style={{ gridColumn: "1 / -1" }}>
+          <div className="empty-state">
             <div className="empty-state__icon">🔍</div>
-            <h3 style={{ marginBottom: "8px", color: "var(--text-primary)" }}>
-              Nenhum profissional encontrado
-            </h3>
+            <h3>Nenhum profissional encontrado</h3>
             <p className="empty-state__text">
               Tente ajustar seus filtros de busca.
             </p>

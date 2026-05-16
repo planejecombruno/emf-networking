@@ -172,7 +172,7 @@ export default function RegistrationForm({ onSuccess, user }) {
           type="email"
           value={form.email}
           disabled
-          style={{ background: "rgba(0,0,0,0.03)", color: "var(--text-muted)" }}
+          style={{ background: "var(--border)", color: "var(--text-muted)", opacity: 0.6 }}
         />
         <p className="field__hint">Vinculado à sua conta</p>
       </div>
@@ -180,7 +180,7 @@ export default function RegistrationForm({ onSuccess, user }) {
       <div className="field">
         <label className="field__label">Sexo</label>
         <div className="gender-options">
-          {["Masculino", "Feminino", "Outro"].map((g) => (
+          {["Masculino", "Feminino"].map((g) => (
             <div
               key={g}
               className={`gender-option ${form.sexo === g ? "gender-option--active" : ""}`}
@@ -325,54 +325,27 @@ export default function RegistrationForm({ onSuccess, user }) {
 
       <h2 className="form-card__section-title">Privacidade e Visibilidade</h2>
       <div className="field">
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            fontSize: "0.85rem",
-            cursor: "pointer",
-            marginBottom: "12px",
-            color: "var(--text-primary)",
-          }}
-        >
+        <label className="checkbox-label">
           <input
             type="checkbox"
+            className="checkbox-input"
             checked={form.mostrar_telefone}
             onChange={(e) =>
               setForm({ ...form, mostrar_telefone: e.target.checked })
             }
-            style={{
-              width: "18px",
-              height: "18px",
-              accentColor: "var(--accent)",
-            }}
           />
-          Mostrar meu WhatsApp no diretório
+          Mostrar WhatsApp
         </label>
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            fontSize: "0.85rem",
-            cursor: "pointer",
-            color: "var(--text-primary)",
-          }}
-        >
+        <label className="checkbox-label">
           <input
             type="checkbox"
+            className="checkbox-input"
             checked={form.mostrar_email}
             onChange={(e) =>
               setForm({ ...form, mostrar_email: e.target.checked })
             }
-            style={{
-              width: "18px",
-              height: "18px",
-              accentColor: "var(--accent)",
-            }}
           />
-          Mostrar meu E-mail no diretório
+          Mostrar E-mail
         </label>
       </div>
 
