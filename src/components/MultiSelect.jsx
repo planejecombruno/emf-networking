@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 
-export default function MultiSelect({ options, selected, onChange, placeholder }) {
+export default function MultiSelect({ options, selected, onChange, placeholder, hideCustom }) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [customValue, setCustomValue] = useState('')
@@ -21,7 +21,7 @@ export default function MultiSelect({ options, selected, onChange, placeholder }
   }, [options, search])
 
   const toggle = (item) => {
-    if (item === 'Outro' || item === 'Outros') {
+    if ((item === 'Outro' || item === 'Outros') && !hideCustom) {
       setShowCustom(true)
       setOpen(false)
       setSearch('')
@@ -87,13 +87,15 @@ export default function MultiSelect({ options, selected, onChange, placeholder }
             <div className="multi-select__option" style={{ color: 'var(--text-muted)' }}>Nenhum resultado</div>
           )}
           
-          <div 
-            className="multi-select__option" 
-            style={{ borderTop: '1px solid var(--border)', fontWeight: 500, color: 'var(--accent)' }}
-            onClick={() => toggle('Outro')}
-          >
-            + Outro
-          </div>
+          {!hideCustom && (
+            <div 
+              className="multi-select__option" 
+              style={{ borderTop: '1px solid var(--border)', fontWeight: 500, color: 'var(--accent)' }}
+              onClick={() => toggle('Outro')}
+            >
+              + Outro
+            </div>
+          )}
         </div>
       )}
 

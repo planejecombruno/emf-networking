@@ -16,9 +16,6 @@ function App() {
         <Route path="/sucesso" element={<SuccessPage />} />
         <Route path="/diretorio" element={<DirectoryPage />} />
       </Routes>
-      <footer className="footer">
-        © {new Date().getFullYear()} EMF Networking. Todos os direitos reservados.
-      </footer>
     </AuthProvider>
   )
 }

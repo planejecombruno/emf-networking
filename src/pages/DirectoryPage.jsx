@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { AREAS } from "../lib/constants";
 import NavBar from "../components/NavBar";
+import MultiSelect from "../components/MultiSelect";
 import { useAuth } from "../contexts/AuthContext";
 import {
   FaLinkedin,
@@ -130,7 +131,7 @@ export default function DirectoryPage() {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filterArea, setFilterArea] = useState("");
+  const [selectedAreas, setSelectedAreas] = useState([]);
   const [filterEstado, setFilterEstado] = useState("");
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -205,13 +206,26 @@ export default function DirectoryPage() {
       cidade.toLowerCase().includes(searchLower) ||
       cargo.toLowerCase().includes(searchLower);
 
-    const matchArea = filterArea
-      ? filterArea === "Outro"
-        ? // Caso especial: Filtra quem tem áreas customizadas ou não tem nada
-          (p.area_atuacao?.split(", ").some(tag => !AREAS.includes(tag)) || !p.area_atuacao) ||
-          (p.area_interesse?.split(", ").some(tag => !AREAS.includes(tag)) || !p.area_interesse)
-        : // Caso padrão: Filtra pela área selecionada
-          p.area_atuacao?.includes(filterArea) || p.area_interesse?.includes(filterArea)
+    const matchArea = selectedAreas.length > 0
+      ? selectedAreas.some(area => {
+          if (area === "Outros") {
+            // Filtra quem tem áreas customizadas (não presentes na lista padrão)
+            const hasCustomAtuacao = p.area_atuacao
+              ?.split(",")
+              .some((tag) => {
+                const t = tag.trim();
+                return t && !AREAS.includes(t);
+              });
+            const hasCustomInteresse = p.area_interesse
+              ?.split(",")
+              .some((tag) => {
+                const t = tag.trim();
+                return t && !AREAS.includes(t);
+              });
+            return hasCustomAtuacao || hasCustomInteresse;
+          }
+          return p.area_atuacao?.includes(area) || p.area_interesse?.includes(area);
+        })
       : true;
 
     const matchEstado = filterEstado ? p.estado === filterEstado : true;
@@ -222,13 +236,6 @@ export default function DirectoryPage() {
   return (
     <div className="page-wrapper">
       <NavBar />
-
-      <div className="directory-header">
-        <h1>EMF <span>Networking</span></h1>
-        <p>
-          Conecte-se com os melhores profissionais do mercado financeiro e expanda sua rede de contatos de forma estratégica.
-        </p>
-      </div>
 
       <div className="filters-container">
         <div className="filters-main">
@@ -259,35 +266,18 @@ export default function DirectoryPage() {
           </div>
         </div>
 
-        <div className="filter-areas-row">
-          <div className="filter-areas-label">
+        <div className="filter-areas-row" style={{ marginTop: '0' }}>
+          <div className="filter-areas-label" style={{ marginBottom: '8px' }}>
             <FaFilter size={12} />
-            <span>Filtrar por Área:</span>
+            <span>Filtrar por Área(s):</span>
           </div>
-          <br />
-          <div className="filter-chips">
-            <button
-              className={`filter-chip ${!filterArea ? "filter-chip--active" : ""}`}
-              onClick={() => setFilterArea("")}
-            >
-              Todas
-            </button>
-            {AREAS.map((area) => (
-              <button
-                key={area}
-                className={`filter-chip ${filterArea === area ? "filter-chip--active" : ""}`}
-                onClick={() => setFilterArea(area)}
-              >
-                {area}
-              </button>
-            ))}
-            <button
-              className={`filter-chip ${filterArea === "Outro" ? "filter-chip--active" : ""}`}
-              onClick={() => setFilterArea("Outro")}
-            >
-              Outro
-            </button>
-          </div>
+          <MultiSelect
+            options={[...AREAS, "Outros"]}
+            selected={selectedAreas}
+            onChange={setSelectedAreas}
+            placeholder="Selecione as áreas para filtrar..."
+            hideCustom
+          />
         </div>
       </div>
 
@@ -314,7 +304,7 @@ export default function DirectoryPage() {
                   .filter(Boolean)
               : [];
             const interesseTags =
-              interesseTagsRaw.length > 0 ? interesseTagsRaw : ["Outro"];
+              interesseTagsRaw.length > 0 ? interesseTagsRaw : ["Outros"];
 
             return (
               <div key={profile.id} className="profile-card-wrapper">

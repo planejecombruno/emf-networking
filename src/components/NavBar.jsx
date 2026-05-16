@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
-import { FaWhatsapp, FaMoon, FaSun } from "react-icons/fa";
+import { FaWhatsapp, FaMoon, FaSun, FaBars, FaTimes, FaSignOutAlt, FaUserCircle, FaUsers, FaSignInAlt } from "react-icons/fa";
 
 export default function NavBar() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -32,7 +33,7 @@ export default function NavBar() {
         EMF<span>Networking</span>
       </Link>
 
-      <div className="nav-links">
+      <div className="header__right">
         <button
           onClick={toggleTheme}
           className="theme-toggle"
@@ -42,61 +43,68 @@ export default function NavBar() {
           {theme === "light" ? <FaMoon size={18} /> : <FaSun size={18} />}
         </button>
 
-        {user ? (
-          <>
-            <a
-              href="https://chat.whatsapp.com/J0MCE7hJJo6Cu8NBkxa9fi"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="nav-link nav-link--whatsapp"
-            >
-              <FaWhatsapp size={18} />
-              <span>Comunidade</span>
-            </a>
-            {isProfilePage ? (
-              <Link
-                to="/diretorio"
-                className="nav-link"
-                style={{ fontWeight: 600 }}
+        <button 
+          className="menu-toggle" 
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Menu"
+        >
+          {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+        </button>
+
+        <div className={`nav-links ${isMenuOpen ? "nav-links--open" : ""}`}>
+          {user ? (
+            <>
+              <a
+                href="https://chat.whatsapp.com/J0MCE7hJJo6Cu8NBkxa9fi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nav-link nav-link--whatsapp"
+                onClick={() => setIsMenuOpen(false)}
               >
-                Profissionais
-              </Link>
-            ) : (
-              <Link
-                to="/perfil"
-                className="nav-link"
-                style={{ fontWeight: 600 }}
+                <FaWhatsapp size={18} />
+                <span>Comunidade</span>
+              </a>
+              {isProfilePage ? (
+                <Link
+                  to="/diretorio"
+                  className="nav-link"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <FaUsers size={18} />
+                  <span>Profissionais</span>
+                </Link>
+              ) : (
+                <Link
+                  to="/perfil"
+                  className="nav-link"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <FaUserCircle size={18} />
+                  <span>Meu Perfil</span>
+                </Link>
+              )}
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsMenuOpen(false);
+                }}
+                className="nav-link nav-link--logout"
               >
-                Meu Perfil
-              </Link>
-            )}
-            <button
-              onClick={handleLogout}
-              className="nav-link"
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-              }}
+                <FaSignOutAlt size={18} />
+                <span>Sair</span>
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/auth"
+              className="nav-link nav-link--auth"
+              onClick={() => setIsMenuOpen(false)}
             >
-              Sair
-            </button>
-          </>
-        ) : (
-          <Link
-            to="/auth"
-            className="nav-link"
-            style={{
-              background: "var(--accent)",
-              color: "#fff",
-              padding: "6px 12px",
-              borderRadius: "4px",
-            }}
-          >
-            Entrar
-          </Link>
-        )}
+              <FaSignInAlt size={18} />
+              <span>Entrar</span>
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );
