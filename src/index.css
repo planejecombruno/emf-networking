@@ -704,11 +704,52 @@ a:hover { text-decoration: underline; }
   margin-top: 4px;
 }
 
-.profile-card__areas-container {
+.profile-card__areas-group {
+  margin-bottom: 16px;
+}
+
+.profile-card__bio-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+/* Scrollable Tags Container & Arrows */
+.scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-arrow {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all var(--transition);
+  padding: 0;
+}
+
+.scroll-arrow:hover {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.scroll-arrow:active {
+  transform: scale(0.95);
 }
 
 .profile-card__area-tag {
@@ -722,8 +763,6 @@ a:hover { text-decoration: underline; }
   transition: all var(--transition);
 }
 
-/* Area tags are static */
-
 .profile-card__bio-group {
   margin-bottom: 20px;
 }
@@ -732,11 +771,27 @@ a:hover { text-decoration: underline; }
   font-size: 0.85rem;
   color: var(--text-secondary);
   line-height: 1.6;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  height: auto;
+  max-height: 72px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.profile-card__bio::-webkit-scrollbar {
+  width: 4px;
+}
+
+.profile-card__bio::-webkit-scrollbar-track {
+  background: var(--bg);
+  border-radius: 4px;
+}
+
+.profile-card__bio::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.profile-card__bio::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .profile-card__links {
