@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { AREAS, ESTADOS_BR } from "../lib/constants";
 import MultiSelect from "./MultiSelect";
+import { FaCamera, FaSpinner, FaTrash } from "react-icons/fa";
 
 const initialForm = {
   nome: "",
@@ -21,12 +22,63 @@ const initialForm = {
   mostrar_email: false,
 };
 
+const resizeImage = (file, maxWidth = 500, maxHeight = 500) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Erro ao converter imagem"));
+              return;
+            }
+            const resizedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            });
+            resolve(resizedFile);
+          },
+          "image/jpeg",
+          0.85
+        );
+      };
+      img.onerror = (error) => reject(error);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 export default function RegistrationForm({ onSuccess, user }) {
   const [form, setForm] = useState(initialForm);
   const [profileId, setProfileId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [errors, setErrors] = useState({});
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -71,6 +123,51 @@ export default function RegistrationForm({ onSuccess, user }) {
       // Ignora erro se não encontrar perfil
     } finally {
       setFetching(false);
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 3 * 1024 * 1024) {
+      setImageError("O arquivo excede o limite de 3MB. Por favor, escolha uma imagem menor.");
+      return;
+    }
+
+    setUploadingImage(true);
+    setImageError("");
+
+    try {
+      const resizedFile = await resizeImage(file, 500, 500);
+
+      const fileExt = "jpg";
+      const fileName = `avatar_${user.id}_${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("profile_picture")
+        .upload(filePath, resizedFile, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("profile_picture")
+        .getPublicUrl(filePath);
+
+      if (publicUrlData?.publicUrl) {
+        setForm((prev) => ({ ...prev, foto_url: publicUrlData.publicUrl }));
+      }
+    } catch (err) {
+      console.error("Erro no upload da foto:", err);
+      setImageError("Erro ao enviar foto. Verifique se o bucket 'profile_picture' existe no storage e permite uploads (RLS).");
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -268,17 +365,65 @@ export default function RegistrationForm({ onSuccess, user }) {
       </div>
 
       <div className="field">
-        <label className="field__label">URL da foto de perfil</label>
-        <input
-          className="field__input"
-          type="url"
-          placeholder="https://exemplo.com/foto.jpg"
-          value={form.foto_url}
-          onChange={set("foto_url")}
-        />
-        <p className="field__hint">
-          Cole a URL de uma foto sua (LinkedIn, Gravatar, etc.)
-        </p>
+        <label className="field__label">Foto de perfil (máx. 3MB)</label>
+        <div className="avatar-upload-container">
+          <div className="avatar-preview-box">
+            {form.foto_url ? (
+              <img src={form.foto_url} alt="Foto de perfil" className="avatar-preview-img" />
+            ) : (
+              <div className="avatar-preview-placeholder">
+                {(form.nome || "?").charAt(0).toUpperCase()}
+              </div>
+            )}
+            {uploadingImage && (
+              <div className="avatar-upload-overlay">
+                <FaSpinner className="spinner-icon" />
+              </div>
+            )}
+          </div>
+
+          <div className="avatar-upload-actions">
+            <input
+              type="file"
+              accept="image/*"
+              id="avatar-input"
+              hidden
+              disabled={uploadingImage}
+              onChange={handleImageUpload}
+            />
+            <label htmlFor="avatar-input" className="btn-upload-avatar" style={{ cursor: uploadingImage ? "not-allowed" : "pointer" }}>
+              <FaCamera size={14} />
+              <span>{uploadingImage ? "Enviando..." : "Escolher Foto"}</span>
+            </label>
+            {form.foto_url && (
+              <button
+                type="button"
+                className="btn-remove-avatar"
+                onClick={() => setForm({ ...form, foto_url: "" })}
+                disabled={uploadingImage}
+                title="Remover foto"
+              >
+                <FaTrash size={12} />
+                <span>Remover</span>
+              </button>
+            )}
+          </div>
+        </div>
+        {imageError && <p className="field__error" style={{ marginTop: 8 }}>{imageError}</p>}
+
+        <div style={{ marginTop: 12 }}>
+          <label className="field__label" style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: 4 }}>
+            URL da foto (gerada pelo upload ou cole um link direto)
+          </label>
+          <input
+            className="field__input"
+            type="url"
+            placeholder="https://exemplo.com/foto.jpg"
+            value={form.foto_url}
+            onChange={set("foto_url")}
+            style={{ fontSize: "0.85rem", padding: "8px 12px" }}
+          />
+        </div>
         {errors.foto_url && <p className="field__error">{errors.foto_url}</p>}
       </div>
 
