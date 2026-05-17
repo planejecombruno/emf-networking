@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import RegistrationForm from '../components/RegistrationForm'
+import ChangePasswordForm from '../components/ChangePasswordForm'
 import NavBar from '../components/NavBar'
 
 export default function ProfilePage() {
@@ -24,6 +25,7 @@ export default function ProfilePage() {
         <p className="hero__desc" style={{ fontSize: '0.85rem' }}>Atualize suas informações para aparecer no diretório.</p>
       </div>
       <RegistrationForm onSuccess={() => navigate('/diretorio')} user={user} />
+      <ChangePasswordForm user={user} />
     </div>
   )
 }
