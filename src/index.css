@@ -914,6 +914,112 @@ a:hover { text-decoration: underline; }
   }
 }
 
+/* ===== VIEW & DENSITY CONTROLS ===== */
+.view-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+@media (max-width: 640px) {
+  .view-controls-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.view-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .view-controls-group {
+    justify-content: space-between;
+  }
+}
+
+.view-controls-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.toggle-btn-group {
+  display: flex;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  gap: 4px;
+}
+
+.toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: var(--font);
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.toggle-btn:hover {
+  color: var(--accent);
+}
+
+.toggle-btn--active {
+  background: var(--bg-card);
+  color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===== DIRECTORY LIST VIEW ===== */
+.directory-grid--list {
+  grid-template-columns: 1fr !important;
+  max-width: 1100px;
+}
+
+@media (min-width: 768px) {
+  .profile-card--list-compact {
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+  }
+
+  .profile-card--list-compact .profile-card__info {
+    display: flex;
+    align-items: center;
+    width: auto;
+    flex: 1;
+  }
+
+  .profile-card--list-compact .profile-card__header {
+    margin: 0;
+    flex: 1;
+  }
+
+  .profile-card--list-compact .profile-card__links {
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+}
+
 /* ===== NAV BAR ===== */
 .nav-links {
   display: flex;

@@ -13,8 +13,28 @@ import {
   FaChevronRight,
   FaSearch,
   FaFilter,
+  FaTh,
+  FaList,
+  FaCompressAlt,
+  FaExpandAlt,
 } from "react-icons/fa";
 import { ESTADOS_BR } from "../lib/constants";
+
+const formatShortName = (name) => {
+  if (!name) return "";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length <= 2) return name;
+
+  const first = parts[0];
+  const last = parts[parts.length - 1];
+  const middle = parts
+    .slice(1, parts.length - 1)
+    .filter((p) => p.length > 2)
+    .map((p) => p[0].toUpperCase() + ".")
+    .join(" ");
+
+  return middle ? `${first} ${middle} ${last}` : `${first} ${last}`;
+};
 
 const ScrollableTags = ({ title, tags, colorType }) => {
   const scrollRef = useRef(null);
@@ -133,6 +153,8 @@ export default function DirectoryPage() {
   const [search, setSearch] = useState("");
   const [selectedAreas, setSelectedAreas] = useState([]);
   const [filterEstado, setFilterEstado] = useState("");
+  const [viewMode, setViewMode] = useState("grid"); // "grid" | "list"
+  const [cardMode, setCardMode] = useState("full"); // "full" | "compact"
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -279,9 +301,58 @@ export default function DirectoryPage() {
             hideCustom
           />
         </div>
+        <div className="view-controls-bar">
+          <div className="view-controls-group">
+            <span className="view-controls-label">Visualização:</span>
+            <div className="toggle-btn-group">
+              <button
+                type="button"
+                className={`toggle-btn ${viewMode === "grid" ? "toggle-btn--active" : ""}`}
+                onClick={() => setViewMode("grid")}
+                title="Visão em Bloco (3 por linha)"
+              >
+                <FaTh size={14} />
+                <span>Bloco</span>
+              </button>
+              <button
+                type="button"
+                className={`toggle-btn ${viewMode === "list" ? "toggle-btn--active" : ""}`}
+                onClick={() => setViewMode("list")}
+                title="Visão em Lista (1 por linha)"
+              >
+                <FaList size={14} />
+                <span>Lista</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="view-controls-group">
+            <span className="view-controls-label">Conteúdo:</span>
+            <div className="toggle-btn-group">
+              <button
+                type="button"
+                className={`toggle-btn ${cardMode === "full" ? "toggle-btn--active" : ""}`}
+                onClick={() => setCardMode("full")}
+                title="Card Completo (com áreas e bio)"
+              >
+                <FaExpandAlt size={14} />
+                <span>Completo</span>
+              </button>
+              <button
+                type="button"
+                className={`toggle-btn ${cardMode === "compact" ? "toggle-btn--active" : ""}`}
+                onClick={() => setCardMode("compact")}
+                title="Card Resumido (foto, nome, cargo, estado e redes)"
+              >
+                <FaCompressAlt size={14} />
+                <span>Resumido</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="directory-grid">
+      <div className={`directory-grid ${viewMode === "list" ? "directory-grid--list" : ""}`}>
         {loading ? (
           <>
             <div className="skeleton skeleton-card"></div>
@@ -308,7 +379,11 @@ export default function DirectoryPage() {
 
             return (
               <div key={profile.id} className="profile-card-wrapper">
-                <div className="profile-card">
+                <div 
+                  className={`profile-card ${
+                    viewMode === "list" && cardMode === "compact" ? "profile-card--list-compact" : ""
+                  }`}
+                >
                   <div className="profile-card__info">
                     <div className="profile-card__header">
                       {profile.foto_url ? (
@@ -323,7 +398,9 @@ export default function DirectoryPage() {
                         </div>
                       )}
                       <div className="profile-card__header-content">
-                        <h3 className="profile-card__name">{profile.nome}</h3>
+                        <h3 className="profile-card__name" title={profile.nome}>
+                          {formatShortName(profile.nome)}
+                        </h3>
                         {profile.cargo && (
                           <div className="profile-card__cargo">
                             {profile.cargo}
@@ -334,32 +411,38 @@ export default function DirectoryPage() {
                         </div>
                       </div>
                     </div>
-                    {atuacaoTags.length > 0 && (
-                      <ScrollableTags 
-                        title="Atuação" 
-                        tags={atuacaoTags} 
-                        colorType="interest"
-                      />
+                    {cardMode === "full" && (
+                      <>
+                        {atuacaoTags.length > 0 && (
+                          <ScrollableTags 
+                            title="Atuação" 
+                            tags={atuacaoTags} 
+                            colorType="interest"
+                          />
+                        )}
+                        <ScrollableTags
+                          title="Interesse"
+                          tags={interesseTags}
+                          colorType="success"
+                        />
+                      </>
                     )}
-                    <ScrollableTags
-                      title="Interesse"
-                      tags={interesseTags}
-                      colorType="success"
-                    />
                   </div>
 
-                  <div className="profile-card__bio-group">
-                    <span className="profile-card__bio-label">
-                      Biografia
-                    </span>
-                    <div className="profile-card__bio">
-                      {profile.sobre || (
-                        <span style={{ fontStyle: "italic", opacity: 0.5 }}>
-                          Sem biografia.
-                        </span>
-                      )}
+                  {cardMode === "full" && (
+                    <div className="profile-card__bio-group">
+                      <span className="profile-card__bio-label">
+                        Biografia
+                      </span>
+                      <div className="profile-card__bio">
+                        {profile.sobre || (
+                          <span style={{ fontStyle: "italic", opacity: 0.5 }}>
+                            Sem biografia.
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="profile-card__links">
                     {profile.linkedin_url && (
