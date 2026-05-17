@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 
-export default function MultiSelect({ options, selected, onChange, placeholder, hideCustom }) {
+export default function MultiSelect({ options, selected, onChange, placeholder, hideCustom, hideSelectedTags }) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [customValue, setCustomValue] = useState('')
@@ -51,7 +51,7 @@ export default function MultiSelect({ options, selected, onChange, placeholder, 
 
   return (
     <div className="multi-select" ref={ref}>
-      {selected.length > 0 && (
+      {!hideSelectedTags && selected.length > 0 && (
         <div className="multi-select__tags">
           {selected.map((item) => (
             <span className="multi-select__tag" key={item}>

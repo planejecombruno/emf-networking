@@ -286,21 +286,47 @@ export default function DirectoryPage() {
               ))}
             </select>
           </div>
+
+          <div className="filter-area-wrapper">
+            <MultiSelect
+              options={[...AREAS, "Outros"]}
+              selected={selectedAreas}
+              onChange={setSelectedAreas}
+              placeholder="Filtrar por área(s)..."
+              hideCustom
+              hideSelectedTags
+            />
+          </div>
         </div>
 
-        <div className="filter-areas-row" style={{ marginTop: '0' }}>
-          <div className="filter-areas-label" style={{ marginBottom: '8px' }}>
-            <FaFilter size={12} />
-            <span>Filtrar por Área(s):</span>
+        {selectedAreas.length > 0 && (
+          <div className="selected-filters-bar">
+            <span className="selected-filters-label">Áreas selecionadas:</span>
+            <div className="multi-select__tags" style={{ marginBottom: 0 }}>
+              {selectedAreas.map((item) => (
+                <span className="multi-select__tag" key={item}>
+                  {item}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedAreas(selectedAreas.filter((s) => s !== item))}
+                    aria-label={`Remover ${item}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            {selectedAreas.length > 1 && (
+              <button
+                type="button"
+                className="btn-clear-tags"
+                onClick={() => setSelectedAreas([])}
+              >
+                Limpar tudo
+              </button>
+            )}
           </div>
-          <MultiSelect
-            options={[...AREAS, "Outros"]}
-            selected={selectedAreas}
-            onChange={setSelectedAreas}
-            placeholder="Selecione as áreas para filtrar..."
-            hideCustom
-          />
-        </div>
+        )}
         <div className="view-controls-bar">
           <div className="view-controls-group">
             <span className="view-controls-label">Visualização:</span>
