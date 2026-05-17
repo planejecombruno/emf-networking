@@ -84,9 +84,9 @@ export default function RegistrationForm({ onSuccess, user }) {
     if (!form.cidade.trim()) errs.cidade = "Cidade é obrigatória";
     if (form.area_atuacao.length === 0)
       errs.area_atuacao = "Selecione ao menos uma área";
-    if (form.linkedin_url && !/^https?:\/\/.+/.test(form.linkedin_url))
-      errs.linkedin_url = "URL inválida";
-    if (form.foto_url && !/^https?:\/\/.+/.test(form.foto_url))
+    if (form.linkedin_url && !/^https?:\/\/(www\.|[a-z]{2}\.)?linkedin\.com\/.*$/i.test(form.linkedin_url.trim()))
+      errs.linkedin_url = "Insira um link válido do LinkedIn (ex: https://linkedin.com/in/seuperfil)";
+    if (form.foto_url && !/^https?:\/\/.+/.test(form.foto_url.trim()))
       errs.foto_url = "URL inválida";
     setErrors(errs);
     return Object.keys(errs).length === 0;
